@@ -1,11 +1,16 @@
- //creating server 
- const express=require("express")
- const {adminAuth}=require("./middlewares/auth.js")
- const app=express();
- app.use("/admin",adminAuth)
- app.get("/admin/getAllData",(req,res)=>{
-   res.send({firstName:"Ayush",lastName:"Singh"});
- })
- app.listen(3000,()=>{
-    console.log("hello server");
- })
+//create server
+const express=require("express");
+const {connectDB}=require("./config/database")
+const app=express();
+connectDB()
+.then(()=>{
+console.log("Database connection established..");
+app.listen(3000,()=>{
+  console.log("server is sucessfully on port 3000");
+})
+}).catch((err)=>{
+console.log("Database cannot be connected");
+})
+
+
+
