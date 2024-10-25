@@ -7,14 +7,16 @@ const userSchema=new mongoose.Schema({
         type:String,
     },
     email:{
-        type:String
+        type:String 
     },
     age:{
         type:Number
     },
     gender:{
-        type:String
+        type:String ,
+        default: null 
     }
 })
 const User=mongoose.model("User",userSchema);
 module.exports=User;
+
