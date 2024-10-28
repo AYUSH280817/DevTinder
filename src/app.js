@@ -3,7 +3,6 @@ const express=require("express");
 const connectDB=require("./config/database")
 const app=express();
 const User=require('./models/user')
-
 app.use(express.json());
 
 app.post("/signup",async (req,res)=>{
@@ -19,7 +18,6 @@ app.post("/signup",async (req,res)=>{
 //find a data 
 app.get("/user",async(req,res)=>{
   const useremail=req.body.email;
-  
   const emailfind=await User.find({email:useremail})
   if(emailfind.length===0)
   {
@@ -28,7 +26,6 @@ app.get("/user",async(req,res)=>{
   }
   else{
     res.send(emailfind)
-
   } 
 })
 //find all data
@@ -54,23 +51,31 @@ app.delete('/user', async (req, res) => {
 });
 //update 
 app.patch("/user",async(req,res)=>{
-  const userid=req.body._id;
+  const userid=req.body.userid;
   const data=req.body;
-  const updateuser=await User.findByIdAndUpdate(userid,data);
-  res.send("update hogaya hai");
+  try{
+    const updateuser=await User.findByIdAndUpdate(userid,data,{
+      returnDocument:"after",
+      runValidators:true
+    });
+    res.send("update hogaya hai"+updateuser);
+
+  }
+  catch(err)
+  {
+    res.status(404).send("erroe hai"+err.message)
+  }
+ 
 })
+
 connectDB()
 .then(()=>{
 console.log("Database connection established..");
-app.listen(3000,()=>{
-  console.log("server is sucessfully on port 3000");
+app.listen(3001,()=>{
+  console.log("server is sucessfully on port 7777");
 })
 }).catch((err)=>{
 console.log("Database cannot be connected");
 })
-
-
-
-
 
 
