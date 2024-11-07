@@ -1,81 +1,96 @@
-//create server
-const express=require("express");
-const connectDB=require("./config/database")
-const app=express();
-const User=require('./models/user')
+const express = require("express");
+const connectDB = require("./config/database");
+const app = express();
+const User = require("./models/user");
+const bcrypt=require('bcrypt'); 
+const validateSignUpData=require('./utils/validation')
 app.use(express.json());
-
-app.post("/signup",async (req,res)=>{
-  const user=new User(req.body)
-  try{
+connectDB()
+  .then(() => {
+    app.listen(3000, () => {
+      console.log("Server is successfully running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.log("Server failed to connect: " + err.message);
+  });
+// Post new user
+app.post("/signup", async (req, res) => {
+  
+  try {
+    //validation of data
+   validateSignUpData(req)
+  //encrypt the password
+    const {firstName,lastName,email,password}=req.body;
+    const passwordHash=await bcrypt.hash(password,10);
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password:passwordHash
+    });
     await user.save();
-    res.send("user added succesfully");
-  }catch(err)
-  {
-    res.status(400).send("error saving the data")
+    res.status(201).send({ message: "User created successfully", user });
+  } catch (error) {
+    res.status(500).send({ error: error.message });
   }
 });
-//find a data 
+//get the user
 app.get("/user",async(req,res)=>{
   const useremail=req.body.email;
   const emailfind=await User.find({email:useremail})
   if(emailfind.length===0)
   {
-    res.status(404).send("did noot find")
-
+    res.status(404).send("did not find")
   }
   else{
     res.send(emailfind)
   } 
 })
-//find all data
-app.get('/feed',async(req,res)=>{
-const userf=await User.find({});
-res.send(userf);
-})
-//delete the data from database
-app.delete('/user', async (req, res) => {
-  const userId = req.body._id;
-
-  try {
-    const result = await User.findByIdAndDelete(userId);
-
-    if (!result) {
-      return res.status(404).send("User not found, deletion failed");
+//update the user
+app.patch("/user", async (req, res) => {
+    const userid = req.body.userid; 
+    const data = req.body;
+    try{
+        const ALLOWED_UPDATE = ["userid", "age", "gender"];
+        const isUpdateAllowed = Object.keys(data).every((key) =>
+        ALLOWED_UPDATE.includes(key)  
+        );
+        if (!isUpdateAllowed) {
+            throw new Error("Invalid fields for update");
+        }
+        const user = await User.findByIdAndUpdate(userid, data, {
+            returnDocument: "after",
+            runValidators: true,
+        });
+        if (!user) { 
+            return res.status(404).send("User not found");
+        }
+        res.send(" Update successful ");
+    } catch(err){
+        res.status(400).send("Error:"+err.message);
     }
-
-    res.send("User deleted successfully");
-  } catch (err) {
-    res.status(400).send(`Error deleting user: ${err.message}`);
-  }
-});
-//update 
-app.patch("/user",async(req,res)=>{
-  const userid=req.body.userid;
-  const data=req.body;
+  });
+//login the data
+app.post("/login",async(req,res)=>{
   try{
-    const updateuser=await User.findByIdAndUpdate(userid,data,{
-      returnDocument:"after",
-      runValidators:true
-    });
-    res.send("update hogaya hai"+updateuser);
-
-  }
-  catch(err)
+    const {email,password}=req.body ;
+    const user=await User.findOne({email:email})
+    console.log(user);
+    if(!user)
+    {
+      throw new Error("invalid email");
+    }  
+      const isPasswordValid=await bcrypt.compare(password,user.password); 
+       if(isPasswordValid)
+       {
+        res.send("password is valid");
+       }
+       else{
+        throw new Error("password is not valid") 
+       }
+  }catch(err)
   {
-    res.status(404).send("erroe hai"+err.message)
+res.status(400).send("Error"+err.message);
   }
- 
-})
-
-connectDB()
-.then(()=>{
-console.log("Database connection established..");
-app.listen(3001,()=>{
-  console.log("server is sucessfully on port 7777");
-})
-}).catch((err)=>{
-console.log("Database cannot be connected");
-})
-
-
+})  

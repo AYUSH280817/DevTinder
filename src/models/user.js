@@ -1,37 +1,60 @@
-
-const mongoose=require("mongoose")
+const validator=require("validator")
+const mongoose=require('mongoose')
 const userSchema=mongoose.Schema({
-    firstName:{
-     type:String,
-     required:true,
-    },
-    lastName:{
-       type:String,
-    },
-    email:{
-        type:String,
-         required:true,
-         unique: true,
-         trin:true, 
-         lowercase:true
-    },
-    age:{
-        type:Number,
-        min:18,
-    },
-     gender:{
-        type:String,
-        validate(value)
+ firstName:{
+    type:String,
+    required:true
+ },
+ lastName:{
+    type:String,
+    required:true,
+ },
+ email:{
+    type:String,
+    required:true,
+    trin:true,
+    unique:true,
+    validate(value)
+    {
+        if(!validator.isEmail(value))
         {
-         if(!["Male","Female","other"].includes(value))
-         {
-            throw new Error("Gender data is not valid")
-         }
-        },
-     },
-   
-},{
-    timestamps:true,
- });
+         throw new Error("invalid email");
+        }
+    }
+ },
+ age:{
+    type:Number,
+    min:18
+ },
+ gender:{
+    type:String,
+    validate(value){
+     if(!["male","female","other"].includes(value))
+     {
+        throw new Error("Gender data is not valid");
+     }
+    }
+ },
+ password:{
+   type:String,
+   validate(value)
+   {
+      if(!validator.isStrongPassword(value))
+      {
+       throw new Error("Invalid password")
+      }
+   }
+ },
+ skills:{
+    type:[String],
+ }
+},{timestamps:true})
 const User=mongoose.model("User",userSchema);
 module.exports=User;
+
+
+
+
+
+
+
