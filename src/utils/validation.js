@@ -31,4 +31,23 @@ if((firstName <=3 && firstName >= 50) ||(lastName <=3 && lastName >= 50) )
     throw new Error("first or last name size is not valid")
 }
 }
-module.exports=validateSignUpData
+
+const validateEditProfileData=(req)=>{
+    const allowedEditFields=[
+        "firstName",
+        "lastName",
+        "email",
+        "photoUrl",
+        "gender",
+        "age"
+    ];
+   const isEditAllowed=Object.keys(req.body).every(field=>allowedEditFields.includes(field));
+ 
+   return isEditAllowed
+}
+
+module.exports=
+{
+    validateSignUpData,
+    validateEditProfileData,
+}

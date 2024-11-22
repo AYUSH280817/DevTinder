@@ -97,6 +97,9 @@ const userSchema = mongoose.Schema(
         }
       },
     },
+    photoUrl:{
+      type:String,
+    },
     skills: {
       type: [String],
     },
