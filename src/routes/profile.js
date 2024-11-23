@@ -26,7 +26,5 @@ profileRouter.get("/profile",userAuth,async(req,res)=>{
     {
        res.send("err"+err.message)
     }
-
-
  })
  module.exports=profileRouter;

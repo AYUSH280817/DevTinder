@@ -70,7 +70,7 @@ const userSchema = mongoose.Schema(
       require: true,
       trim: true,
       unique: true,
-      validate(value) {
+      validate(value){
         if (!validator.isEmail(value)) {
           throw new Error("Email is not valid");
         }
@@ -80,18 +80,18 @@ const userSchema = mongoose.Schema(
       type: Number,
       min: 18,
     },
-    gender: {
+    gender:{
       type: String,
       validate(value) {
         if (!["male", "female"].includes(value)) {
           throw new Error("Gender is not valid");
-        }
+        } 
       },
     },
     password: {
       type: String,
       validate(value) {
-        // Use validator's isStrongPassword method
+        // Use validator isStrongPassword method
         if (!validator.isStrongPassword(value)) {
           throw new Error("Password is not strong enough");
         }

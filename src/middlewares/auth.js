@@ -14,11 +14,12 @@ const userAuth=async(req,res,next)=>{
     {
       throw new Error("User is not valid");
     }
-    req.user=user;
+    req. user=user;
     next()
-  }catch(err){
+  }
+  catch(err){
     res.status(400).send("Error"+err.message);
-        throw new error("Invaild");  
+    throw new error("Invaild");  
   }
 }
 module.exports=userAuth
