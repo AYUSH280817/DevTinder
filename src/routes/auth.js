@@ -20,8 +20,14 @@ try{
         age,
         gender
     })
-await user.save();
-res.send("user is succesfuly save")
+const savedUser=await user.save();
+const token =await savedUser.getJWT()
+res.cookie("token", token, {
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+    httpOnly: true,
+  });
+  
+res.json({message:"user is succesfuly save",data:savedUser,token})
 }catch(err)
 {
     res.send("error hai koi"+err.message)
@@ -29,28 +35,33 @@ res.send("user is succesfuly save")
 })
 
 //login the user
-authRouter.post("/login",async(req,res)=>{
-    try{
-        const {email,password}=req.body;
-        const user=await User.findOne({email:email})
-        if(!email)
-        {
-            throw new Error("email is not valid");
+authRouter.post("/login", async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email: email });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
         }
-        const isPasswordValid=await bcrypt.compare(password,user.password)
-        if(!isPasswordValid)
-        {
-            throw new Error("password is not valid");
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: "Invalid password" });
         }
-       //create a jwt token
-         const token= jwt.sign({_id:user._id},"DEVTINDER@28",{expiresIn:"7d"});
-         res.cookie("token",token);
-         res.send(user)
-    }catch(err){
-        console.error("Login Error: ", err.message);
-      res.send("Error hai"+err.message)
+
+        // Generate JWT token
+        const token = jwt.sign({ _id: user._id }, "DEVTINDER@28", { expiresIn: "7d" });
+
+        res.cookie("token", token, {
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+            httpOnly: true,
+        });
+
+        res.json({ user, token }); // Send user data and token in the response
+    } catch (err) {
+        console.error("Login Error:", err.message);
+        res.status(500).send("Error during login: " + err.message);
     }
-})
+});
 
 //logout api
 authRouter.post("/logout",(req,res)=>{
