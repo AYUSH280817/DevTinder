@@ -3,19 +3,22 @@ const authRouter=express.Router();
 const bcrypt=require("bcrypt")
 const {validateSignUpData}=require('../utils/validation')
 const User=require("../models/user")
-const jwt=require("jsonwebtoken")
+const jwt=require( "jsonwebtoken")
 
 //signup the user(creating new user)
 authRouter.post("/signup",async(req,res)=>{
 try{
     validateSignUpData(req);
-    const {firstName , lastName, email,password}=req.body;
+    const {firstName , lastName, email,password,photoUrl,age,gender}=req.body;
     const passwordHash=await bcrypt.hash(password,10);
     const user=new User({
         firstName,
         lastName,
         email,
-        password:passwordHash
+        password:passwordHash,
+        photoUrl,
+        age,
+        gender
     })
 await user.save();
 res.send("user is succesfuly save")
@@ -42,8 +45,9 @@ authRouter.post("/login",async(req,res)=>{
        //create a jwt token
          const token= jwt.sign({_id:user._id},"DEVTINDER@28",{expiresIn:"7d"});
          res.cookie("token",token);
-         res.send("user has been login")
+         res.send(user)
     }catch(err){
+        console.error("Login Error: ", err.message);
       res.send("Error hai"+err.message)
     }
 })

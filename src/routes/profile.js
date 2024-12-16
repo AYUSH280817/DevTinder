@@ -10,7 +10,7 @@ profileRouter.get("/profile",userAuth,async(req,res)=>{
  })
 
  //edit the profile
- profileRouter.patch("/profile/edit",userAuth,async(req,res)=>{
+ profileRouter.post("/profile/edit",userAuth,async(req,res)=>{
     try{
         if(!validateEditProfileData)
             {
@@ -20,11 +20,12 @@ profileRouter.get("/profile",userAuth,async(req,res)=>{
           Object.keys(req.body).forEach(key=>loginuser[key]=req.body[key])
           await loginuser.save();
           console.log(loginuser);
-          res.send(`${loginuser.firstName},your profile is upadted`)
+          res.send(loginuser)
     }
     catch(err)
     {
        res.send("err"+err.message)
     }
  })
+ 
  module.exports=profileRouter;
